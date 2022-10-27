@@ -20,7 +20,7 @@ def open_files(full_path=os.getcwd(), _filter="*.txt"):
     else:
         filelist = []  # list of raw files to process
         os.chdir(full_path)
-        print('Scanning for data files in:\t', full_path)
+        # print('Scanning for data files in:\t', full_path)
         for file in glob.glob(_filter):
             filelist.append(file)  # add txt files to the list
         # print('The following files will be processed:')

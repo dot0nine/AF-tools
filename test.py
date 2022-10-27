@@ -8,12 +8,12 @@ scapCC4 = AFcollection.AF_Collection()
 
 scapCC4.import_af_run(r'C:\Users\lj21342\OneDrive - University of Bristol\Documents\01-Science\Computational\scapCC4\AF2\apCC4_x4 vs SC\\')
 data_dict = scapCC4.get_data()
-models = pd.DataFrame.from_dict(data_dict, orient='index')
+proteins = pd.DataFrame.from_dict(data_dict, orient='index')
 # data_dict = {}
-# for model in models:
+# for model in proteins:
 #     data_dict[model] = scapCC4.output_analysis(model)
 # data = pd.DataFrame.from_dict(data_dict)
-print(models.columns)
+print(proteins.columns)
 fig1, axs = plt.subplots(1, 2)  # pLDDT and pAE
 # sns.set_theme(style="ticks", palette="pastel")
 axs = np.array(axs)  # https://www.pythonfixing.com/2021/10/fixed-python-subplot-used-to-show-one.html
@@ -29,33 +29,39 @@ for par, ax, yl in zip(pars, axs.flat, ((0, 100), (0, 30))):  # plot only the pa
     ax.set_title(par, fontsize=14)
     # out_str += par + '\n'
     palette = itertools.cycle(sns.color_palette("Set2"))
-    # for model in models:
+    # for model in proteins:
     # data = scapCC4.output_analysis(model)
     #     ax.scatter()
 
-    # print([scapCC4.output_analysis(model)[par]['dataset'] for model in models])
-    # sns.boxplot(x=models.keys(), y=[scapCC4.output_analysis(model)[par]['dataset'] for model in models])
-    # for x, y in zip(models.keys(), [scapCC4.output_analysis(model)[par]['dataset'] for model in models]):
+    # print([scapCC4.output_analysis(model)[par]['dataset'] for model in proteins])
+    # sns.boxplot(x=proteins.keys(), y=[scapCC4.output_analysis(model)[par]['dataset'] for model in proteins])
+    # for x, y in zip(proteins.keys(), [scapCC4.output_analysis(model)[par]['dataset'] for model in proteins]):
     #     sns.barplot(x=x, y=y)
-    # print(len(models['pLDDT_av']))
-    # print(models.iloc[0])
-    # print(models.iloc[0])
-    # print(models['pLDDT_av'])
-    # print(models[f'{par}'].index)
-    # print(models[f'{par}'].values)
-    sns.boxplot(models[f'{par}'], ax=ax)
+    # print(len(proteins['pLDDT_av']))
+    # print(proteins.iloc[0])
+    # print(proteins.iloc[0])
+    # print(proteins['pLDDT_av'])
+    # print(proteins[f'{par}'].index)
+    # print(proteins[f'{par}'].values)
+
+    sns.boxplot(proteins[f'{par}'], ax=ax)
+    # print(proteins[par])
+    # print(proteins['Protein'])
+    #
+    # sns.boxplot(y=par, x='Protein', data=proteins, ax=ax)
+
     # print(data_dict.keys())
     # print([data_dict[model][f'{par}'] for model in data_dict.keys()])
     # for model in data_dict.keys():
     #     sns.boxplot(x=data_dict.keys(), y=data_dict[model][f'{par}'], ax=ax)
 
 
-    # sns.boxplot(x=models.iloc[0], y=models['pLDDT_av']) #, data=models)
+    # sns.boxplot(x=proteins.iloc[0], y=proteins['pLDDT_av']) #, data=proteins)
     #ax.set_xtick(rotation=45)
 
         # for p in pars:
-        # # pLDDT, pLDDT_av, pLDDT_best, pAE, pAE_av, pAE_best = [x for x in models[model].values()]
-        # for k,v in zip([pLDDT, pLDDT_av, pLDDT_best, pAE, pAE_av, pAE_best])models[model].items():
+        # # pLDDT, pLDDT_av, pLDDT_best, pAE, pAE_av, pAE_best = [x for x in proteins[model].values()]
+        # for k,v in zip([pLDDT, pLDDT_av, pLDDT_best, pAE, pAE_av, pAE_best])proteins[model].items():
         #     data = samples[s].get_surfaces()[par]['dataset']
         #     pLDDT_av, pLDDT_best, pAE_av, pAE_best = samples[s].get_stat_par(data)
         #     color = next(palette)
