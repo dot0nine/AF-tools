@@ -16,7 +16,7 @@ class AF_Collection(object):
         return self.proteins
 
     def get_stat_par(self, x):
-        return [np.average(x), np.std(x), np.var(x), np.median(x)]
+        return {'av': np.average(x), 'std': np.std(x), 'var': np.var(x), 'med': np.median(x), 'max': np.maximum(x)}
 
     def import_af_run(self, _dir):
         self.set_dir(_dir)
@@ -25,21 +25,39 @@ class AF_Collection(object):
         # delimeters = ''
 
         subdirs = [x[0] for x in os.walk(self._dir)][1:]  #  exclude the root folder
-        # for sd in subdirs:
-        #     print(sd)
         for count, sd in enumerate(subdirs):
-            prot = sd.split('\\')[-1][:-7]
-            print('prot\t', prot)
-            self.proteins[count] = {'Protein': prot, 'pLDDT': [], 'pAE': [], 'rank': [], 'model_num': [], 'ylim_pLDDT': [0, 100], 'ylim_pAE': [0,30]}  # to get rid of .result ending
+            # print(sd)
+            self.proteins[count] = {'Protein': '', 'pLDDT': [], 'pAE': [], 'rank': [], 'model_num': [], 'ylim_pLDDT': [0, 100], 'ylim_pAE': [0,30]}  # to get rid of .result ending
 
             json_files = open_files(full_path=sd, _filter='*' + f_extension)
             for f in json_files:
-                if re.match(prot + '_unrelaxed_rank_\d+_model_\d+_scores', f):
-                    # print('File', f)
+#                if re.match('\w+_unrelaxed_rank_\d+_model_\d+_scores', f):
+                if re.search('scores_rank_\d+_alphafold2_\w+_model_\d+', f):
+                    run = re.split('scores_rank_\d+_alphafold2_\w+_model_\d+', f)[0][:-1]
+                    prot  = []
+                    # print(run)
+                    for i in run.split('_'):
+                        # print(i)
+                        prot.append(i)
+                        if re.match('(\w+)?x\d+', i):
+                            # print('yo')
+                            # print(int(i.split('x')[-1]))
+                            self.proteins[count]['Oligo state'] = int(i.split('x')[-1])
+                            break
 
+                    prot = '_'.join(prot)
+
+                    for k, v in self.get_data().items():
+                        if 'Oligo state' not in v:
+                            v['Oligo state'] = 1
+
+
+                    # print('prot\t', prot)
+                    # print('File', f)
+                    self.proteins[count]['Protein'] = prot
                     pLDDT, pAE = self.scores(f'{sd}\\{f}')
-                    # print()
-                    rank_n, model_n = self.extract_rank_model_n(f, prot)
+
+                    rank_n, model_n = self.extract_rank_model_n(f, run)
                     # print('Pars\t', (pLDDT, pAE, rank_n, model_n))
                     for k, v in zip(('pLDDT', 'pAE', 'rank', 'model_num'), (pLDDT, pAE, rank_n, model_n)):
                         self.proteins[count][k].append(v)
@@ -69,7 +87,8 @@ class AF_Collection(object):
 
 
     def extract_rank_model_n(self, s, prot):
-        pattern = re.compile(prot + '_unrelaxed_rank_(?P<rank_n>.*?)_model_(?P<model_n>.*?)_scores', re.VERBOSE)
+        # pattern = re.compile(prot + '_unrelaxed_rank_(?P<rank_n>.*?)_model_(?P<model_n>.*?)_scores', re.VERBOSE)
+        pattern = re.compile(prot + '_scores_rank_(?P<rank_n>.*?)_alphafold2_\w+_model_(?P<model_n>.*?)_seed_\d+', re.VERBOSE)
         match = pattern.match(s)
         if match:
             rank_n = int(match.group("rank_n"))
@@ -90,8 +109,8 @@ class AF_Collection(object):
     def scores(self, file):
         # file = f'{prot}_unrelaxed_rank_{model_num}.json'
         dataframe = pd.read_json(file)
-        pLDDT = np.mean(dataframe.iloc[:,2])
-        pAE = dataframe.iloc[:,1]
+        pLDDT = np.mean(dataframe['plddt']) #.iloc[:,2])
+        pAE = dataframe['pae']  # .iloc[:,1]
         pae_av_re = []
         for k in range(0, len(pAE)):
             pae_av_re.append(np.mean(pAE.iloc[k]))
